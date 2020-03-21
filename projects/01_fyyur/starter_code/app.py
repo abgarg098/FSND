@@ -5,6 +5,7 @@
 import json
 import dateutil.parser
 import babel
+from datetime import *
 from flask import Flask, render_template, request, Response, flash, redirect, url_for
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
@@ -12,6 +13,7 @@ import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
+from models import Venue, Artist, Show, setup_db
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -19,43 +21,7 @@ from forms import *
 app = Flask(__name__)
 moment = Moment(app)
 app.config.from_object('config')
-db = SQLAlchemy(app)
-
-# TODO: connect to a local postgresql database
-
-#----------------------------------------------------------------------------#
-# Models.
-#----------------------------------------------------------------------------#
-
-class Venue(db.Model):
-    __tablename__ = 'Venue'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    address = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-
-class Artist(db.Model):
-    __tablename__ = 'Artist'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+db = setup_db(app)
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -87,27 +53,30 @@ def index():
 def venues():
   # TODO: replace with real venues data.
   #       num_shows should be aggregated based on number of upcoming shows per venue.
-  data=[{
-    "city": "San Francisco",
-    "state": "CA",
-    "venues": [{
-      "id": 1,
-      "name": "The Musical Hop",
-      "num_upcoming_shows": 0,
-    }, {
-      "id": 3,
-      "name": "Park Square Live Music & Coffee",
-      "num_upcoming_shows": 1,
-    }]
-  }, {
-    "city": "New York",
-    "state": "NY",
-    "venues": [{
-      "id": 2,
-      "name": "The Dueling Pianos Bar",
-      "num_upcoming_shows": 0,
-    }]
-  }]
+  current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+  venue_query = Venue.query.order_by(Venue.state, Venue.city).all()
+  city_and_state = ''
+  data = []
+  for venue in venue_query:
+      upcoming_shows = venue.shows.filter(Show.start_time > current_time).all()
+      if city_and_state == venue.city + venue.state:
+          data[len(data) - 1]["venues"].append({
+            "id": venue.id,
+            "name": venue.name,
+            "num_upcoming_shows": len(upcoming_shows)
+          })
+      else:
+          city_and_state = venue.city + venue.state
+          data.append({
+            "city": venue.city,
+            "state": venue.state,
+            "venues": [{
+              "id": venue.id,
+              "name": venue.name,
+              "num_upcoming_shows": len(upcoming_shows)
+            }]
+          })
+
   return render_template('pages/venues.html', areas=data);
 
 @app.route('/venues/search', methods=['POST'])
@@ -206,8 +175,23 @@ def show_venue(venue_id):
     "past_shows_count": 1,
     "upcoming_shows_count": 1,
   }
-  data = list(filter(lambda d: d['id'] == venue_id, [data1, data2, data3]))[0]
-  return render_template('pages/show_venue.html', venue=data)
+  #data = list(filter(lambda d: d['id'] == venue_id, [data1, data2, data3]))[0]
+
+  venue_query = Venue.query.get(venue_id)
+  if venue_query:
+        venue_details = Venue.details(venue_query)
+        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        new_shows_query = Show.query.options(db.joinedload(Show.Venue)).filter(Show.venue_id == venue_id).filter(Show.start_time > current_time).all()
+        new_shows_list = list(map(Show.artist_details, new_shows_query))
+        venue_details["upcoming_shows"] = new_shows_list
+        venue_details["upcoming_shows_count"] = len(new_shows_list)
+        past_shows_query = Show.query.options(db.joinedload(Show.Venue)).filter(Show.venue_id == venue_id).filter(Show.start_time <= current_time).all()
+        past_shows_list = list(map(Show.artist_details, past_shows_query))
+        venue_details["past_shows"] = past_shows_list
+        venue_details["past_shows_count"] = len(past_shows_list)
+        return render_template('pages/show_venue.html', venue=venue_details)
+  return render_template('errors/404.html')
+
 
 #  Create Venue
 #  ----------------------------------------------------------------
