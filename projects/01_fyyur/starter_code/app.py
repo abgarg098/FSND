@@ -51,8 +51,6 @@ def index():
 
 @app.route('/venues')
 def venues():
-  # TODO: replace with real venues data.
-  #       num_shows should be aggregated based on number of upcoming shows per venue.
   current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
   venue_query = Venue.query.order_by(Venue.state, Venue.city).all()
   city_and_state = ''
@@ -96,8 +94,6 @@ def search_venues():
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
-    # shows the venue page with the given venue_id
-    # TODO: replace with real venue data from the venues table, using venue_id
     venue_query = Venue.query.get(venue_id)
     if venue_query:
         venue_details = Venue.details(venue_query)
@@ -147,7 +143,6 @@ def delete_venue(venue_id):
 #  ----------------------------------------------------------------
 @app.route('/artists')
 def artists():
-  # TODO: replace with real data returned from querying the database
   artist_query = Artist.query.all()
   artist_list = list(map(Artist.short, artist_query))
   return render_template('pages/artists.html', artists=artist_list)
@@ -169,8 +164,6 @@ def search_artists():
 
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
-  # shows the venue page with the given venue_id
-  # TODO: replace with real venue data from the venues table, using venue_id
   artist_query = Artist.query.get(artist_id)
   if artist_query:
       artist_details = Artist.details(artist_query)
@@ -266,9 +259,6 @@ def create_artist_submission():
 
 @app.route('/shows')
 def shows():
-  # displays list of shows at /shows
-  # TODO: replace with real venues data.
-  #       num_shows should be aggregated based on number of upcoming shows per venue.
   shows_query = Show.query.all()
   shows_list = list(map(Show.details, shows_query))
   
