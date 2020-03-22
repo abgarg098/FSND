@@ -101,7 +101,7 @@ def show_venue(venue_id):
     venue_query = Venue.query.get(venue_id)
     if venue_query:
         venue_details = Venue.details(venue_query)
-        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        current_time = datetime.now()
         new_shows_query = Show.query.options(db.joinedload(Show.Venue)).filter(Show.venue_id == venue_id).filter(Show.start_time > current_time).all()
         new_shows_list = list(map(Show.artist_details, new_shows_query))
         venue_details["upcoming_shows"] = new_shows_list
