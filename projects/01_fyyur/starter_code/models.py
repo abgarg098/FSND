@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, Integer, Boolean, DateTime, ARRAY, ForeignKey
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from datetime import *
 db = SQLAlchemy()
 
 def setup_db(app):
@@ -176,7 +177,7 @@ class Show(db.Model):
             'artist_id': self.artist_id,
             'artist_name': self.Artist.name,
             'artist_image_link': self.Artist.image_link,
-            'start_time': self.start_time
+            'start_time': self.start_time.strftime('%Y-%m-%dT%H:%M:%SZ')
         }
 
     def artist_details(self):
