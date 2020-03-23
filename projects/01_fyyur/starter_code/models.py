@@ -109,9 +109,8 @@ class Artist(db.Model):
     image_link = Column(String(500))
     shows = db.relationship('Show', backref='Artist', lazy='dynamic')
 
-    def __init__(self, id, name, genres, city, state, phone, website, facebook_link, image_link,
+    def __init__(self, name, genres, city, state, phone, website, facebook_link, image_link,
                  seeking_venue=False, seeking_description=""):
-        self.id = id
         self.name = name
         self.genres = genres
         self.city = city
@@ -218,18 +217,18 @@ def insert_venues():
     ven3.insert()
     
 def insert_artists():
-    artist1 = Artist(4, "Guns N Petals", ["Rock n Roll"], "San Francisco", "CA", "326-123-5000", "https://www.gunsnpetalsband.com",
+    artist1 = Artist("Guns N Petals", ["Rock n Roll"], "San Francisco", "CA", "326-123-5000", "https://www.gunsnpetalsband.com",
                      "https://www.facebook.com/GunsNPetals",
                      "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80",
                     True, "Looking for shows to perform at in the San Francisco Bay Area!")
 
     artist1.insert()
 
-    artist2 = Artist(5, "Matt Quevedo", ["Jazz"], "New York", "NY", "300-400-5000",  "", "https://www.facebook.com/mattquevedo923251523",
+    artist2 = Artist("Matt Quevedo", ["Jazz"], "New York", "NY", "300-400-5000",  "", "https://www.facebook.com/mattquevedo923251523",
                      "https://images.unsplash.com/photo-1495223153807-b916f75de8c5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80")
     artist2.insert()
 
-    artist3 = Artist(6, "The Wild Sax Band", ["Jazz", "Classical"], "San Francisco", "CA", "432-325-5432", "", "",
+    artist3 = Artist("The Wild Sax Band", ["Jazz", "Classical"], "San Francisco", "CA", "432-325-5432", "", "",
                      "https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80")
     artist3.insert()
 
