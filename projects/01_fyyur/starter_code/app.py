@@ -148,7 +148,7 @@ def delete_venue(venue_id):
   venue_data = Venue.query.get(venue_id)
   if venue_data:
       Venue.delete(venue_data)
-  return None
+  return redirect(url_for('index'))
   # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
   # clicking that button delete it from the db then redirect the user to the homepage
 
