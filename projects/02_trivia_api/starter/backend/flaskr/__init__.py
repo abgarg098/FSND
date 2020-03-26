@@ -12,12 +12,16 @@ def paginate_questions(request, selection):
   page = request.args.get('page', 1, type=int)
   start =  (page - 1) * QUESTIONS_PER_PAGE
   end = start + QUESTIONS_PER_PAGE
-
+  
   questions = [question.format() for question in selection]
   current_questions= questions[start:end]
 
   return current_questions
 
+class AbortError(Exception):
+  def __init__(self, code):  
+        self.code = code  
+  
 def create_app(test_config=None):
   # create and configure the app
   app = Flask(__name__)
@@ -104,7 +108,7 @@ def create_app(test_config=None):
       question = Question.query.filter(Question.id == question_id).one_or_none()
 
       if question is None:
-        abort(404)
+        raise AbortError(404)
 
       question.delete()
 
@@ -114,6 +118,8 @@ def create_app(test_config=None):
         'total_questions': len(Question.query.all())
       })
 
+    except AbortError as e:
+      abort(e.code)
     except:
       abort(422)
 
@@ -130,6 +136,8 @@ def create_app(test_config=None):
   @app.route('/questions', methods=['POST'])
   def create_question():
     body = request.get_json()
+    if body == None:
+      abort(422)
 
     search_term = body.get('searchTerm', None)
     
@@ -137,6 +145,8 @@ def create_app(test_config=None):
       if search_term:
         selection = Question.query.order_by(Question.id).filter(Question.question.ilike('%{}%'.format(search_term)))
         current_questions = paginate_questions(request, selection)
+        if len(current_questions) == 0: 
+          raise AbortError(404)
 
         return jsonify({
           'success': True,
@@ -147,11 +157,19 @@ def create_app(test_config=None):
 
       else:
         new_title = body.get('question', None)
+        if new_title == None:
+          raise AbortError(404)
         new_answer = body.get('answer', None)
+        if new_answer == None:
+          raise AbortError(404)
         new_difficulty= body.get('difficulty', None)
+        if new_difficulty == None:
+          raise AbortError(404)
         new_category= body.get('category', None)
+        if new_category == None:
+          raise AbortError(404)
 
-    
+        
         question = Question(new_title, new_answer, new_category, new_difficulty)
         question.insert()
 
@@ -161,6 +179,8 @@ def create_app(test_config=None):
           'total_questions': len(Question.query.all())
         })
 
+    except AbortError as e:
+      abort(e.code)
     except:
       abort(422)
   
@@ -194,6 +214,9 @@ def create_app(test_config=None):
     category = Category.query.get(category_id)
     selection = Question.query.order_by(Question.id).filter_by(category=category_id)
     current_questions = paginate_questions(request, selection)
+    
+    if len(current_questions) == 0:
+      abort(404)
 
     return jsonify({
       'success': True,
@@ -227,7 +250,7 @@ def create_app(test_config=None):
 
       category = Category.query.get(quiz_category_id)
       if category == None:
-        abort(404)
+        raise AbortError(404)
 
       selection = Question.query.order_by(Question.id).filter_by(category=quiz_category_id).filter(Question.id.notin_(previous_questions)).all()
       selection_length = len(selection)
@@ -244,6 +267,8 @@ def create_app(test_config=None):
                   "question": None
                 })
 
+    except AbortError as e:
+      abort(e.code)
     except:
       abort(422)
   
