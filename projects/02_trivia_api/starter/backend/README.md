@@ -103,7 +103,7 @@ Example Request Payload
 Example Response
 ```{"created":35,"success":true,"total_questions":20}```
 
-### POST `/questions`
+### POST `/questions?page=<page_number>`
 - Searches for the questions
 - Request Arguments: Page Number
 - Request Body: search_data
