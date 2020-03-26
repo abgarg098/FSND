@@ -173,8 +173,11 @@ def create_app(test_config=None):
 
   TEST: Search by any phrase. The questions list will update to include 
   only question that include that string within their question. 
-  Try using the word "title" to start. 
+  Try using the word "title" to start.
+
   '''
+
+  #  Done 
 
   '''
   @TODO: 
@@ -185,6 +188,21 @@ def create_app(test_config=None):
   category to be shown. 
   '''
 
+  @app.route('/categories/<int:category_id>/questions')
+  def retrieve_categories_by_id(category_id):
+    
+    category = Category.query.get(category_id)
+    selection = Question.query.order_by(Question.id).filter_by(category=category_id)
+    current_questions = paginate_questions(request, selection)
+
+    return jsonify({
+      'success': True,
+      'questions': current_questions,
+      'total_questions': len(selection.all()),
+      'current_category': category.format()
+    })
+    
+    
 
   '''
   @TODO: 
@@ -198,12 +216,59 @@ def create_app(test_config=None):
   and shown whether they were correct or not. 
   '''
 
+  @app.route('/quizzes', methods=['POST'])
+  def play_quiz():
+    body = request.get_json()
+
+    try:
+      previous_questions = body.get('previous_questions', None)
+      quiz_category =  body.get('quiz_category', None)
+      quiz_category_id = quiz_category.get('id', 0)
+
+      category = Category.query.get(quiz_category_id)
+      if category == None:
+        abort(404)
+
+      selection = Question.query.order_by(Question.id).filter_by(category=quiz_category_id).filter(Question.id.notin_(previous_questions)).all()
+      selection_length = len(selection)
+      
+      if selection_length > 0:
+        selected_question = selection[random.randrange(0, selection_length)]
+        return jsonify({
+          'success': True,
+          "question": selected_question.format()
+        })
+      else:
+        return jsonify({
+                  "success": True,
+                  "question": None
+                })
+
+    except:
+      abort(422)
+  
   '''
   @TODO: 
   Create error handlers for all expected errors 
   including 404 and 422. 
   '''
-  
+
+  @app.errorhandler(404)
+  def not_found(error):
+    return jsonify({
+      "success": False, 
+      "error": 404,
+      "message": "Resource not found"
+      }), 404
+
+  @app.errorhandler(422)
+  def unprocessable(error):
+    return jsonify({
+      "success": False, 
+      "error": 422,
+      "message": "unprocessable"
+      }), 422
+
   return app
 
     
