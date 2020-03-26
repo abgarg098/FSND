@@ -66,28 +66,74 @@ One note before you delve into your tasks: for each endpoint you are expected to
 8. Create a POST endpoint to get questions to play the quiz. This endpoint should take category and previous question parameters and return a random questions within the given category, if provided, and that is not one of the previous questions. 
 9. Create error handlers for all expected errors including 400, 404, 422 and 500. 
 
-REVIEW_COMMENT
-```
-This README is missing documentation of your endpoints. Below is an example for your endpoint to get all categories. Please use it as a reference for creating your documentation and resubmit your code. 
-
-Endpoints
-GET '/categories'
-GET ...
-POST ...
-DELETE ...
-
-GET '/categories'
-- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
+## API Endpoints Explanation
+### GET `/categories`
+- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category.
 - Request Arguments: None
-- Returns: An object with a single key, categories, that contains a object of id: category_string key:value pairs. 
-{'1' : "Science",
-'2' : "Art",
-'3' : "Geography",
-'4' : "History",
-'5' : "Entertainment",
-'6' : "Sports"}
+- Returns: List of available categories.
 
-```
+Example Response
+```{"categories":{"1":"Science","2":"Art","3":"Geography","4":"History","5":"Entertainment","6":"Sports"},"success":true}```
+
+### GET `/questions?page=<page_number>`
+- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category.
+- Fetches a dictionary of questions in which the keys are the answer, category, difficulty, id and question.
+- Request Arguments: Page Number
+- Returns: List of questions, number of total questions, current category and categories.
+
+Example Response
+```{"categories":{"1":"Science","2":"Art","3":"Geography","4":"History","5":"Entertainment","6":"Sports"},"current_category":null,"questions":[{"answer":"f","category":1,"difficulty":4,"id":34,"question":"d"}],"success":true,"total_questions":21}```
+
+### DELETE `/questions/<question_id>`
+- Delete question from the questions list.
+- Request Arguments: Question Id
+- Returns: true if successfully deleted and total questions.
+
+Example Response
+```{"deleted":12,"success":true,"total_questions":19}```
+
+### POST `/questions`
+- Create a new question
+- Request Body: question, answer, difficulty and category. 
+- Returns: true if successfully created, id of created question and total questions.
+
+Example Request Payload
+```{"question":"aa","answer":"a","difficulty":"3","category":1}```
+
+Example Response
+```{"created":35,"success":true,"total_questions":20}```
+
+### POST `/questions`
+- Searches for the questions
+- Request Arguments: Page Number
+- Request Body: search_data
+- Returns: List of questions, number of total questions and current category.
+
+Example Request Payload
+```{"searchTerm":"what"}```
+
+Example Response
+```{"current_category":null,"questions":[{"answer":"Lake Victoria","category":3,"difficulty":2,"id":13,"question":"What is the largest lake in Africa?"},{"answer":"Mona Lisa","category":2,"difficulty":3,"id":17,"question":"La Giaconda is better known as what?"},{"answer":"The Liver","category":1,"difficulty":4,"id":20,"question":"What is the heaviest organ in the human body?"},{"answer":"Blood","category":1,"difficulty":4,"id":22,"question":"Hematology is a branch of medicine involving the study of what?"}],"success":true,"total_questions":4}```
+
+### GET `/categories/<int:category_id>/questions`
+- To get questions based on category
+- Request Arguments: Category Id and Page Number.
+- Returns: List of questions, number of total questions and current category.
+
+Example Response
+```{"current_category":{"id":1,"type":"Science"},"questions":[{"answer":"The Liver","category":1,"difficulty":4,"id":20,"question":"What is the heaviest organ in the human body?"},{"answer":"Alexander Fleming","category":1,"difficulty":3,"id":21,"question":"Who discovered penicillin?"},{"answer":"Blood","category":1,"difficulty":4,"id":22,"question":"Hematology is a branch of medicine involving the study of what?"},{"answer":"scs","category":1,"difficulty":1,"id":26,"question":" x"},{"answer":"de","category":1,"difficulty":1,"id":33,"question":"de"},{"answer":"aa","category":1,"difficulty":4,"id":35,"question":"aa"}],"success":true,"total_questions":6}```
+
+### POST `/quizzes`
+- To get questions to play the quiz.
+- Request Body: quiz_category and previous_questions.
+- Returns: Random questions within the given category.
+
+Example Request Payload
+```{"previous_questions":[],"quiz_category":{"type":"Science","id":1}}```
+
+Example Response
+```{"question":{"answer":"Blood","category":1,"difficulty":4,"id":22,"question":"Hematology is a branch of medicine involving the study of what?"},"success":true}```
+
 
 
 ## Testing
