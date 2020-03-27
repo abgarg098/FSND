@@ -45,8 +45,8 @@ def create_app(test_config=None):
             abort(404)
 
         obj = jsonify({
-          'success': True,
-          'categories': categories
+            'success': True,
+            'categories': categories
         })
         return obj
 
@@ -62,11 +62,11 @@ def create_app(test_config=None):
             abort(404)
 
         return jsonify({
-          'success': True,
-          'questions': current_questions,
-          'total_questions': len(Question.query.all()),
-          "categories": categories,
-          "current_category": None,
+            'success': True,
+            'questions': current_questions,
+            'total_questions': len(Question.query.all()),
+            "categories": categories,
+            "current_category": None,
         })
 
     @app.route('/questions/<int:question_id>', methods=['DELETE'])
@@ -81,9 +81,9 @@ def create_app(test_config=None):
             question.delete()
 
             return jsonify({
-              'success': True,
-              'deleted': question_id,
-              'total_questions': len(Question.query.all())
+                'success': True,
+                'deleted': question_id,
+                'total_questions': len(Question.query.all())
             })
 
         except AbortError as e:
@@ -100,16 +100,17 @@ def create_app(test_config=None):
         search_term = body.get('searchTerm')
         try:
             if search_term:
-                selection = Question.query.order_by(Question.id).filter(Question.question.ilike('%{}%'.format(search_term)))
+                selection = Question.query.order_by(Question.id).filter(
+                    Question.question.ilike('%{}%'.format(search_term)))
                 current_questions = paginate_questions(request, selection)
                 if len(current_questions) == 0:
                     raise AbortError(404)
 
                 return jsonify({
-                  'success': True,
-                  'questions': current_questions,
-                  'total_questions': len(selection.all()),
-                  'current_category': None
+                    'success': True,
+                    'questions': current_questions,
+                    'total_questions': len(selection.all()),
+                    'current_category': None
                 })
 
             else:
@@ -131,9 +132,9 @@ def create_app(test_config=None):
                 question.insert()
 
                 return jsonify({
-                  'success': True,
-                  'created': question.id,
-                  'total_questions': len(Question.query.all())
+                    'success': True,
+                    'created': question.id,
+                    'total_questions': len(Question.query.all())
                 })
 
         except AbortError as e:
@@ -144,16 +145,17 @@ def create_app(test_config=None):
     @app.route('/categories/<int:category_id>/questions')
     def retrieve_categories_by_id(category_id):
         category = Category.query.get(category_id)
-        selection = Question.query.order_by(Question.id).filter_by(category=category_id)
+        selection = Question.query.order_by(
+            Question.id).filter_by(category=category_id)
         current_questions = paginate_questions(request, selection)
         if len(current_questions) == 0:
             abort(404)
 
         return jsonify({
-          'success': True,
-          'questions': current_questions,
-          'total_questions': len(selection.all()),
-          'current_category': category.format()
+            'success': True,
+            'questions': current_questions,
+            'total_questions': len(selection.all()),
+            'current_category': category.format()
         })
 
     @app.route('/quizzes', methods=['POST'])
@@ -166,24 +168,28 @@ def create_app(test_config=None):
             quiz_category_id = quiz_category.get('id', -1)
 
             if quiz_category_id == 0:
-                selection = Question.query.order_by(Question.id).filter(Question.id.notin_(previous_questions)).all()
+                selection = Question.query.order_by(Question.id).filter(
+                    Question.id.notin_(previous_questions)).all()
             else:
                 category = Category.query.get(quiz_category_id)
                 if category is None:
                     raise AbortError(404)
-                selection = Question.query.order_by(Question.id).filter_by(category=quiz_category_id).filter(Question.id.notin_(previous_questions)).all()
+                selection = Question.query.order_by(Question.id).filter_by(
+                    category=quiz_category_id).filter(
+                    Question.id.notin_(previous_questions)).all()
             selection_length = len(selection)
             if selection_length > 0:
-                selected_question = selection[random.randrange(0, selection_length)]
+                selected_question = selection[random.randrange(
+                    0, selection_length)]
                 return jsonify({
-                  'success': True,
-                  "question": selected_question.format()
+                    'success': True,
+                    "question": selected_question.format()
                 })
             else:
                 return jsonify({
-                          "success": True,
-                          "question": None
-                        })
+                    "success": True,
+                    "question": None
+                })
 
         except AbortError as e:
             abort(e.code)
@@ -193,17 +199,17 @@ def create_app(test_config=None):
     @app.errorhandler(404)
     def not_found(error):
         return jsonify({
-          "success": False,
-          "error": 404,
-          "message": "Resource not found"
-          }), 404
+            "success": False,
+            "error": 404,
+            "message": "Resource not found"
+        }), 404
 
     @app.errorhandler(422)
     def unprocessable(error):
         return jsonify({
-          "success": False,
-          "error": 422,
-          "message": "unprocessable"
-          }), 422
+            "success": False,
+            "error": 422,
+            "message": "unprocessable"
+        }), 422
 
     return app
