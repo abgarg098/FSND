@@ -139,7 +139,7 @@ def create_app(test_config=None):
     if body == None:
       abort(422)
 
-    search_term = body.get('searchTerm', None)
+    search_term = body.get('searchTerm')
     
     try:
       if search_term:
