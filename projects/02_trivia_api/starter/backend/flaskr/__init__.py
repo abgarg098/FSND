@@ -246,13 +246,17 @@ def create_app(test_config=None):
     try:
       previous_questions = body.get('previous_questions', None)
       quiz_category =  body.get('quiz_category', None)
-      quiz_category_id = quiz_category.get('id', 0)
+      quiz_category_id = quiz_category.get('id', -1)
 
-      category = Category.query.get(quiz_category_id)
-      if category == None:
-        raise AbortError(404)
-
-      selection = Question.query.order_by(Question.id).filter_by(category=quiz_category_id).filter(Question.id.notin_(previous_questions)).all()
+      if quiz_category_id == 0:
+          selection = Question.query.order_by(Question.id).filter(Question.id.notin_(previous_questions)).all()
+      
+      else:
+        category = Category.query.get(quiz_category_id)
+        if category == None:
+          raise AbortError(404)
+        selection = Question.query.order_by(Question.id).filter_by(category=quiz_category_id).filter(Question.id.notin_(previous_questions)).all()
+      
       selection_length = len(selection)
       
       if selection_length > 0:
