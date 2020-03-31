@@ -18,7 +18,7 @@ CORS(app)
 '''
 # db_drop_and_create_all()
 
-## ROUTES
+# ROUTES
 '''
 @TODO implement endpoint
     GET /drinks
@@ -38,7 +38,8 @@ def fetch_drinks():
     return jsonify({
         "success": True,
         "drinks": drinks
-    }) 
+    })
+
 
 '''
 @TODO implement endpoint
@@ -59,6 +60,7 @@ def fetch_drinks_detail(payload):
         'success': True,
         'drinks': drinks_details
     })
+
 
 '''
 @TODO implement endpoint
@@ -88,12 +90,12 @@ def create_drink(payload):
         return jsonify({
             'success': True,
             'drinks': drink
-        }) 
+        })
 
-    except Exception as e:
+    except:
         abort(404)
-    
-   
+
+
 '''
 @TODO implement endpoint
     PATCH /drinks/<id>
@@ -111,11 +113,11 @@ def update_drink_by_id(payload, id):
     drink = Drink.query.get(id)
     if drink is None:
         abort(404)
-    
+
     body = request.get_json()
     if body is None:
         abort(422)
-    
+
     try:
         drink.title = body.get('title')
         drink.recipe = json.dumps(body.get('recipe'))
@@ -124,11 +126,10 @@ def update_drink_by_id(payload, id):
         return jsonify({
             'success': True,
             'drinks': [drink.long()]
-        }) 
+        })
 
     except:
         abort(404)
-    
 
     '''
 @TODO implement endpoint
@@ -146,30 +147,31 @@ def delete_drink_by_id(payload, id):
     drink = Drink.query.get(id)
     if drink is None:
         abort(404)
-    
+
     try:
         drink.delete()
-        
+
         return jsonify({
             'success': True,
             'delete': drink.id
-        }) 
+        })
 
     except:
         abort(404)
 
 
-## Error Handling
+# Error Handling
 '''
 Example error handling for unprocessable entity
 '''
 @app.errorhandler(422)
 def unprocessable(error):
     return jsonify({
-                    "success": False, 
-                    "error": 422,
-                    "message": "unprocessable"
-                    }), 422
+        "success": False,
+        "error": 422,
+        "message": "unprocessable"
+    }), 422
+
 
 '''
 @TODO implement error handlers using the @app.errorhandler(error) decorator
@@ -187,6 +189,7 @@ def unprocessable(error):
     error handler should conform to general task above 
 '''
 
+
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({
@@ -194,6 +197,7 @@ def not_found(error):
         "error": 404,
         "message": "Resource not found"
     }), 404
+
 
 '''
 @TODO implement error handler for AuthError
@@ -206,5 +210,3 @@ def auth_error(error):
         "error": error.status_code,
         "message": error.error
     }), error.status_code
-
-    
